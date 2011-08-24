@@ -3,4 +3,5 @@ O=tgen.o two.o
 all: ${O}
 	${CC} ${O} -o Two -fwhole-program -lglfw -lGL
 spr:
-	pinch font G _ r +2
+	pinch font G _ r
+.PHONY:spr
