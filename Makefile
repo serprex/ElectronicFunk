@@ -1,6 +1,9 @@
-CC=gcc -std=gnu99 -O3 -s
-O=tgen.o ef.c
+CC=gcc -std=gnu99 -Ofast -g -pipe
+O=tgen.o bgen.o spr.o o.o ef.o
 all: ${O}
-	${CC} ${O} -o ElectronicFunk -fwhole-program -lglfw -lGL
+	${CC} ${O} -o ElectronicFunk -fwhole-program -lglfw -lGL -lm
+clean:
+	rm -rf *.o
 spr: spr/*
-	pinch font G _ r +2
+	pinch S R
+	bitch map
