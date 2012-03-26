@@ -1,4 +1,4 @@
-CC=gcc -std=gnu99 -Ofast -g -pipe
+CC=gcc -std=gnu99 -Ofast -s -pipe
 O=tgen.o bgen.o spr.o o.o ef.o
 all: ${O}
 	${CC} ${O} -o ElectronicFunk -fwhole-program -lglfw -lGL -lm

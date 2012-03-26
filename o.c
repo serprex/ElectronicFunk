@@ -41,7 +41,6 @@ void qtinit(){
 	qroot=qtmake(0);
 }
 static void qthit_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	//printf("!%p %p %d %d %d\n",q,q->o,x,y,w);
 	unsigned xw=x+w/2,yh=y+w/2;
 	for(obj*qo=q->o;qo;qo=qo->o)
 		if(ohit(o,qo))jadd(&o->c,qo);
@@ -56,10 +55,8 @@ void qthit(obj*o){
 	qthit_(qroot,o,0,0,16384);
 }
 static void qtadd_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	//printf("\t%d %p %p:%d %d %d\n",o->t,q,q->o,x,y,w);
 	unsigned xw=x+w/2,yh=y+w/2;
 	if(w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
-		//if(q->o==o)return;
 		o->o=q->o;
 		q->o=o;
 		return;

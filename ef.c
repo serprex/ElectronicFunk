@@ -16,28 +16,28 @@ obj*RR;
 void Pupmask(){
 	memset(&Pmask,0,sizeof(Pmask));
 	for(int i=0;i<6;i++){
-		if(getbxy(Px+i,Py))Pmask.y0|=1<<i;
-		if(getbxy(Px+i,Py+15))Pmask.y15|=1<<i;
-		if(getbxy(Px+i,Py+16))Pmask.y16|=1<<i;
+		if(getbxyi(P->x+i,P->y))Pmask.y0|=1<<i;
+		if(getbxyi(P->x+i,P->y+15))Pmask.y15|=1<<i;
+		if(getbxyi(P->x+i,P->y+16))Pmask.y16|=1<<i;
 	}
 	for(int i=0;i<16;i++){
-		if(getbxy(Px,Py+i))Pmask.x0|=1<<i;
-		if(getbxy(Px+6,Py+i))Pmask.x6|=1<<i;
+		if(getbxyi(P->x,P->y+i))Pmask.x0|=1<<i;
+		if(getbxyi(P->x+6,P->y+i))Pmask.x6|=1<<i;
 	}
 	int px=P->x,py=P->y;
 	P->x=Px;
-	P->y=Py;
+	P->y=ceil(Py);
 	qthit(P);
 	for(int i=0;i<P->c->n;i++){
 		obj*o=P->c->o[i];
 		for(int i=0;i<6;i++){
-			if(pino(Px+i,Py,o))Pmask.y0|=1<<i;
-			if(pino(Px+i,Py+15,o))Pmask.y15|=1<<i;
-			if(pino(Px+i,Py+16,o))Pmask.y16|=1<<i;
+			if(pino(P->x+i,P->y,o))Pmask.y0|=1<<i;
+			if(pino(P->x+i,P->y+15,o))Pmask.y15|=1<<i;
+			if(pino(P->x+i,P->y+16,o))Pmask.y16|=1<<i;
 		}
 		for(int i=0;i<16;i++){
-			if(pino(Px,Py+i,o))Pmask.x0|=1<<i;
-			if(pino(Px+6,Py+i,o))Pmask.x6|=1<<i;
+			if(pino(P->x,P->y+i,o))Pmask.x0|=1<<i;
+			if(pino(P->x+6,P->y+i,o))Pmask.x6|=1<<i;
 		}
 	}
 	P->x=px;
@@ -68,8 +68,7 @@ int main(int argc,char**argv){
 		double oPx=Px,oPy=Py;
 		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
 		qthit(P);
-		if(glfwGetKey(GLFW_KEY_RIGHT))Px++;
-		if(glfwGetKey(GLFW_KEY_LEFT))Px--;
+		Px+=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		Pupmask();
 		if(oPx!=Px){
 			Pd=Px-oPx;
@@ -109,26 +108,28 @@ int main(int argc,char**argv){
 				if(Pya>0&&nthbit(Pmask.y15,x)){
 					Pya=0;
 					Py=ceil(Py);
+					rescandown:
 					Pupmask();
 					for(int x=0;x<6;x+=5)
 						if(nthbit(Pmask.y15,x)){
-							x=0;
 							Py--;
-							Pupmask();
+							goto rescandown;
 						}
 					break;
 				}
 				if(Pya<0&&nthbit(Pmask.y0,x)){
 					Pya=0;
 					Py=floor(Py);
+					rescanup:
+					Pupmask();
 					for(int x=0;x<6;x+=5)
 						if(nthbit(Pmask.y15,x)){
-							x=0;
 							Py++;
-							Pupmask();
+							goto rescanup;
 						}
 					break;
 				}
+				printf("%f\n",Py);
 			}
 			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd==1);
 		}
