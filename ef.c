@@ -104,17 +104,15 @@ int main(int argc,char**argv){
 			Pya=fmin(Pya+.09375,3);
 			Py+=Pya;
 			Pupmask();
-			for(int x=0;x<6;x+=5){
-				if(Pya>0&&nthbit(Pmask.y15,x)){
-					Pya=0;
-					Py=ceil(Py);
-					do Pupmask(); while(Pmask.y15&&(Py--,1));
-				}
-				if(Pya<0&&nthbit(Pmask.y0,x)){
-					Pya=0;
-					Py=floor(Py);
-					do Pupmask(); while(Pmask.y15&&(Py++,1));
-				}
+			if(Pya>0&&Pmask.y15){
+				Pya=0;
+				Py=ceil(Py);
+				do Pupmask(); while(Pmask.y15&&(Py--,1));
+			}
+			if(Pya<0&&Pmask.y0){
+				Pya=0;
+				Py=floor(Py);
+				do Pupmask(); while(Pmask.y0&&(Py++,1));
 			}
 			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd);
 		}
