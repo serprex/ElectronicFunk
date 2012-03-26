@@ -66,7 +66,9 @@ int main(int argc,char**argv){
 	for(;;){
 		t++;
 		drawRect(0,0,1024,256,Wx/16384.,Wy/16384.,1./16,1./64);
-		qtmove(R,R->x+1,R->y+1);
+		R->x++;
+		R->y++;
+		qtmove(R);
 		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
 		double oPy=Py;
 		int oPx=Px;
@@ -77,7 +79,7 @@ int main(int argc,char**argv){
 			int xm=Pd?Pmask.x6:Pmask.x0;
 			if(!(xm&15)&&xm&0xFFF)Pya=fmin(Pya,-1);
 		}
-		Pcrawl=!Pya&&((Pmask.x0l&&!Pmask.x0h)||(Pmask.x6l&&!Pmask.x6h));
+		Pcrawl=!Pya&&(Pmask.x0l&&!Pmask.x0h||Pmask.x6l&&!Pmask.x6h);
 		while(Pcrawl?Pmask.x0h:Pmask.x0){
 			Px++;
 			Pupmask();
@@ -117,7 +119,10 @@ int main(int argc,char**argv){
 			}
 			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd);
 		}
-		qtmove(P,Px,ceil(Py));
+		P->x=Px;
+		P->y=ceil(Py);
+		qtmove(P);
+		qtdraw(Wx,Wy);
 		if(Px<Wx+512-128)Wx=Px-512+128;
 		else if(Px>Wx+512+128)Wx=Px-512-128;
 		if(Wx<0)Wx=0;

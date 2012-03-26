@@ -32,64 +32,72 @@ void jadd(jray**l,obj*o){
 	}
 	ll->o[ll->n-1]=o;
 }
-static qtree*qtmake(qtree*p){
+static qtree*qtmake(qtree*p,int x,int y,int w){
 	qtree*q=calloc(1,sizeof(qtree));
 	q->p=p;
+	q->x=x;
+	q->y=y;
+	q->w=w;
 	return q;
 }
 void qtinit(){
-	qroot=qtmake(0);
+	qroot=qtmake(0,0,0,8192);
 }
-static void qthit_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	unsigned xw=x+w/2,yh=y+w/2;
+void qtdraw_(qtree*q,int Wx,int Wy){
+	glBegin(GL_LINES);
+	glVertex2f(q->x+q->w-Wx,q->y-Wy);
+	glVertex2f(q->x+q->w-Wx,q->y+q->w*2-Wy);
+	glVertex2f(q->x-Wx,q->y+q->w-Wy);
+	glVertex2f(q->x+q->w*2-Wx,q->y+q->w-Wy);
+	glVertex2f(q->x-Wx,q->y-Wy);
+	glVertex2f(q->x+q->w*2-Wx,q->y+q->w*2-Wy);
+	glVertex2f(q->x+q->w*2-Wx,q->y-Wy);
+	glVertex2f(q->x-Wx,q->y+q->w*2-Wy);
+	glEnd();
+	for(int i=0;i<4;i++)
+		if(q->q[i])qtdraw_(q->q[i],Wx,Wy);
+}
+void qtdraw(int Wx,int Wy){
+	glDisable(GL_TEXTURE_2D);
+	qtdraw_(qroot,Wx,Wy);
+	glEnable(GL_TEXTURE_2D);
+}
+static void qthit_(qtree*q,obj*o){
+	unsigned xw=q->x+q->w,yh=q->y+q->w;
 	for(obj*qo=q->o;qo;qo=qo->o)
 		if(ohit(o,qo))jadd(&o->c,qo);
-	if(o->x<=xw&&o->y<=yh&&q->q[0])qthit_(q->q[0],o,x,y,w/2);
-	if(o->x+o->w>xw&&o->y<=yh&&q->q[1])qthit_(q->q[1],o,xw,y,w/2);
-	if(o->x<=xw&&o->y+o->h>yh&&q->q[2])qthit_(q->q[2],o,x,yh,w/2);
-	if(o->x+o->w>xw&&o->y+o->h>yh&&q->q[3])qthit_(q->q[3],o,xw,yh,w/2);
+	if(o->x<=xw&&o->y<=yh&&q->q[0])qthit_(q->q[0],o);
+	if(o->x+o->w>xw&&o->y<=yh&&q->q[1])qthit_(q->q[1],o);
+	if(o->x<=xw&&o->y+o->h>yh&&q->q[2])qthit_(q->q[2],o);
+	if(o->x+o->w>xw&&o->y+o->h>yh&&q->q[3])qthit_(q->q[3],o);
 }
 void qthit(obj*o){
 	o->c=realloc(o->c,sizeof(jray));
 	o->c->n=0;
-	qthit_(qroot,o,0,0,16384);
+	qthit_(qroot,o);
 }
-static void qtadd_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	unsigned xw=x+w/2,yh=y+w/2;
-	if(w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
+static void qtadd_(qtree*q,obj*o){
+	unsigned xw=q->x+q->w,yh=q->y+q->w;
+	if(q->w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
 		o->o=q->o;
 		q->o=o;
+		o->q=q;
 		return;
 	}
 	int qid;
 	if(o->x<=xw&&o->y<=yh)qid=0;
 	else if(o->x>xw&&o->y<=yh)qid=1;
 	else if(o->x<=xw&&o->y>yh)qid=2;
-	else if(o->x>xw&&o->y>yh)qid=3;
-	if(!q->q[qid])q->q[qid]=qtmake(q);
-	qtadd_(q->q[qid],o,qid==0||qid==2?x:xw,qid==0||qid==1?y:yh,w/2);
+	else qid=3;
+	if(!q->q[qid])q->q[qid]=qtmake(q,qid==0||qid==2?q->x:xw,qid==0||qid==1?q->y:yh,q->w/2);
+	qtadd_(q->q[qid],o);
 }
 void qtadd(obj*o){
-	qtadd_(qroot,o,0,0,16384);
-}
-static void qtrm_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	unsigned xw=x+w/2,yh=y+w/2;
-	if(w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
-		if(!q->o)return;
-		else if(q->o!=o)orm(q->o,o);
-		else q->o=q->o->o;
-		return;
-	}
-	int qid;
-	if(o->x<=xw&&o->y<=yh)qid=0;
-	else if(o->x>xw&&o->y<=yh)qid=1;
-	else if(o->x<=xw&&o->y>yh)qid=2;
-	else if(o->x>xw&&o->y>yh)qid=3;
-	if(!q->q[qid])return;
-	qtrm_(q->q[qid],o,qid==0||qid==2?x:xw,qid==0||qid==1?y:yh,w/2);
+	qtadd_(qroot,o);
 }
 void qtrm(obj*o){
-	qtrm_(qroot,o,0,0,16384);
+	if(o->q->o==o)o->q->o=o->o;
+	else orm(o->q->o,o);
 }
 obj*omake(int sz,int t,int x,int y,int w,int h){
 	obj*o=malloc(sizeof(obj)+sz);
@@ -105,35 +113,26 @@ obj*omake(int sz,int t,int x,int y,int w,int h){
 	qtadd(o);
 	return o;
 }
-static void qtaddhint(qtree*q,obj*o,unsigned x,unsigned y,unsigned w){
-	if(o->x<=x||o->y<=y||o->x+o->w>x+w||o->y+o->h>y+w){
-		int qid=0;
-		for(;qid<3;qid++)
-			if(q==q->p->q[qid])break;
-		qtaddhint(q->p,o,qid==1||qid==3?x-w:x,qid==2||qid==3?y-w:y,w*2);
-	}else qtadd_(q,o,x,y,w);
-
+static int qtfindqid(qtree*q){
+	for(int qid=0;;qid++)
+		if(q==q->p->q[qid])return qid;
 }
-static void qtmove_(qtree*q,obj*o,unsigned x,unsigned y,unsigned w,int ox,int oy){
-	unsigned xw=x+w/2,yh=y+w/2;
-	if(w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
-		if(q->o==o)q->o=o->o;
-		else orm(q->o,o);
-		o->x=ox;
-		o->y=oy;
-		qtaddhint(q,o,x,y,w);
-		return;
+static void qtaddhint(qtree*q,obj*o){
+	while(o->x<=q->x||o->y<=q->y||o->x+o->w>q->x+q->w*2||o->y+o->h>q->y+q->w*2)q=q->p;
+	qtadd_(q,o);
+}
+static void qtgchint(qtree*q){
+	while(!q->o&&!q->q[0]&&!q->q[1]&&!q->q[2]&&!q->q[3]){
+		qtree*p=q->p;
+		p->q[qtfindqid(q)]=0;
+		free(q);
+		q=p;
 	}
-	int qid;
-	if(o->x<=xw&&o->y<=yh)qid=0;
-	else if(o->x>xw&&o->y<=yh)qid=1;
-	else if(o->x<=xw&&o->y>yh)qid=2;
-	else if(o->x>xw&&o->y>yh)qid=3;
-	if(!q->q[qid])return;
-	qtmove_(q->q[qid],o,qid==0||qid==2?x:xw,qid==0||qid==1?y:yh,w/2,ox,oy);
 }
-void qtmove(obj*o,int x,int y){
-	if(x!=o->x||y!=o->y)
-		qtmove_(qroot,o,0,0,16384,x,y);
+void qtmove(obj*o){
+	qtree*q=o->q;
+	qtrm(o);
+	qtaddhint(q,o);
+	qtgchint(q);
 	qthit(o);
 }
