@@ -9,8 +9,8 @@ double Wx=0,Px=1800,Wy=0,Py=900,Pya=0,Pj=-1;
 int t=0,Pd=1,Pjd=0,Pcrawl;
 obj*P;
 struct Pmask{
-	union{uint16_t x0;struct{uint8_t x0l,x0h;}};
-	union{uint16_t x6;struct{uint8_t x6l,x6h;}};
+	union{uint16_t x0;struct{uint8_t x0l,x0h;};};
+	union{uint16_t x6;struct{uint8_t x6l,x6h;};};
 	uint8_t y0,y15,y16;
 }Pmask;
 obj*RR;
@@ -73,14 +73,10 @@ int main(int argc,char**argv){
 		Pupmask();
 		if(oPx!=Px){
 			Pd=Px>oPx;
-			int fy=1;
-			for(int y=0;y<16;y++)
-				if(nthbit(Pd?Pmask.x6:Pmask.x0,y)){
-					if(y>4&&fy)Pya=fmin(Pya,-1);
-					fy=0;
-				}
+			int xm=Pd?Pmask.x6:Pmask.x0;
+			if(!(xm&15)&&xm&0xFFF)Pya=fmin(Pya,-1);
 		}
-		Pcrawl=!Pya&&Pmask.x6l&&!Pmask.x6h;
+		Pcrawl=!Pya&&(Pmask.x0l&&!Pmask.x0h)||(Pmask.x6l&&!Pmask.x6h);
 		while(Pcrawl?Pmask.x0h:Pmask.x0){
 			Px++;
 			Pupmask();
@@ -94,13 +90,9 @@ int main(int argc,char**argv){
 			drawSpr(ManCrawl,Px-Wx,Py-Wy+10,!(t&32),Pd);
 		}else{
 			Pjd=0;
-			if(glfwGetKey(GLFW_KEY_UP)){
-				for(int xx=0;xx<6;xx+=5)
-					if(nthbit(Pmask.y16,xx)){
-						Pj=fmax(Pj-.125,-3);
-						Pjd=1;
-						break;
-					}
+			if(glfwGetKey(GLFW_KEY_UP)&&Pmask.y16){
+				Pj=fmax(Pj-.125,-3);
+				Pjd=1;
 			}
 			if(Pj<-1){
 				if(Pjd)Px=oPx;
@@ -116,43 +108,31 @@ int main(int argc,char**argv){
 				if(Pya>0&&nthbit(Pmask.y15,x)){
 					Pya=0;
 					Py=ceil(Py);
-					rescandown:
-					Pupmask();
-					for(int x=0;x<6;x+=5)
-						if(nthbit(Pmask.y15,x)){
-							Py--;
-							goto rescandown;
-						}
-					break;
+					do Pupmask(); while(Pmask.y15&&(Py--,1));
 				}
 				if(Pya<0&&nthbit(Pmask.y0,x)){
 					Pya=0;
 					Py=floor(Py);
-					rescanup:
-					Pupmask();
-					for(int x=0;x<6;x+=5)
-						if(nthbit(Pmask.y15,x)){
-							Py++;
-							goto rescanup;
-						}
-					break;
+					do Pupmask(); while(Pmask.y15&&(Py++,1));
 				}
-				printf("%f\n",Py);
 			}
 			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd);
 		}
 		qtmove(P,Px,ceil(Py));
-		glfwSwapBuffers();
-		double gT=1./59-glfwGetTime();
-		if(gT>0)glfwSleep(gT);
-		else printf("%f\n",-gT);
-		glfwSetTime(0);
-		glfwPollEvents();
-		if(glfwGetKey(GLFW_KEY_ESC)||!glfwGetWindowParam(GLFW_OPENED))return 0;
 		if(Px<Wx+512-128)Wx=Px-512+128;
 		else if(Px>Wx+512+128)Wx=Px-512-128;
 		if(Wx<0)Wx=0;
 		else if(Wx>2048*8)Wx=2048*8;
 		Wy=Py-160;
+		glfwSwapBuffers();
+		double gT=1./59-glfwGetTime();
+		if(gT>0&&!glfwGetKey(GLFW_KEY_SPACE))glfwSleep(gT);
+		else printf("%f\n",-gT);
+		glfwSetTime(0);
+		glfwPollEvents();
+		if(glfwGetKey(GLFW_KEY_ESC)||!glfwGetWindowParam(GLFW_OPENED)){
+			printf("%f %f\n",Px,Py);
+			return 0;
+		}
 	}
 }
