@@ -5,8 +5,8 @@
 #define MIN(x,y) ((x)>(y)?(y):(x))
 #define case(x) break;case x:
 #define else(x) else if(x)
-double Wx=0,Px=1800,Wy=0,Py=900,Pya=0,Pj=-1;
-int t=0,Pd=1,Pjd=0,Pcrawl;
+double Wy=0,Py=900,Pya=0,Pj=-1;
+int Wx=0,Px=1800,t=0,Pd=1,Pjd=0,Pcrawl;
 obj*P;
 struct Pmask{
 	union{uint16_t x0;struct{uint8_t x0l,x0h;};};
@@ -68,7 +68,8 @@ int main(int argc,char**argv){
 		drawRect(0,0,1024,256,Wx/16384.,Wy/16384.,1./16,1./64);
 		qtmove(R,R->x+1,R->y+1);
 		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
-		double oPx=Px,oPy=Py;
+		double oPy=Py;
+		int oPx=Px;
 		Px+=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		Pupmask();
 		if(oPx!=Px){
@@ -76,7 +77,7 @@ int main(int argc,char**argv){
 			int xm=Pd?Pmask.x6:Pmask.x0;
 			if(!(xm&15)&&xm&0xFFF)Pya=fmin(Pya,-1);
 		}
-		Pcrawl=!Pya&&(Pmask.x0l&&!Pmask.x0h)||(Pmask.x6l&&!Pmask.x6h);
+		Pcrawl=!Pya&&((Pmask.x0l&&!Pmask.x0h)||(Pmask.x6l&&!Pmask.x6h));
 		while(Pcrawl?Pmask.x0h:Pmask.x0){
 			Px++;
 			Pupmask();
@@ -86,7 +87,7 @@ int main(int argc,char**argv){
 			Pupmask();
 		}
 		if(Pcrawl){
-			Px=(Px+oPx)/2;
+			if(t&1)Px=oPx;
 			drawSpr(ManCrawl,Px-Wx,Py-Wy+10,!(t&32),Pd);
 		}else{
 			Pjd=0;
