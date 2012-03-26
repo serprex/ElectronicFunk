@@ -9,11 +9,15 @@ double Wx=0,Px=1800,Wy=0,Py=900,Pya=0,Pj=-1;
 int t=0,Pd=1,Pjd=0,Pcrawl;
 obj*P;
 struct Pmask{
-	uint16_t x0,x6;
+	union{uint16_t x0;struct{uint8_t x0l,x0h;}};
+	union{uint16_t x6;struct{uint8_t x6l,x6h;}};
 	uint8_t y0,y15,y16;
 }Pmask;
 obj*RR;
 void Pupmask(){
+	int px=P->x,py=P->y;
+	P->x=Px;
+	P->y=ceil(Py);
 	memset(&Pmask,0,sizeof(Pmask));
 	for(int i=0;i<6;i++){
 		if(getbxyi(P->x+i,P->y))Pmask.y0|=1<<i;
@@ -24,9 +28,6 @@ void Pupmask(){
 		if(getbxyi(P->x,P->y+i))Pmask.x0|=1<<i;
 		if(getbxyi(P->x+6,P->y+i))Pmask.x6|=1<<i;
 	}
-	int px=P->x,py=P->y;
-	P->x=Px;
-	P->y=ceil(Py);
 	qthit(P);
 	for(int i=0;i<P->c->n;i++){
 		obj*o=P->c->o[i];
@@ -65,25 +66,32 @@ int main(int argc,char**argv){
 	for(;;){
 		t++;
 		drawRect(0,0,1024,256,Wx/16384.,Wy/16384.,1./16,1./64);
-		double oPx=Px,oPy=Py;
+		qtmove(R,R->x+1,R->y+1);
 		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
-		qthit(P);
+		double oPx=Px,oPy=Py;
 		Px+=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		Pupmask();
 		if(oPx!=Px){
-			Pd=Px-oPx;
-			int x=Pd==1?6:0,fy=-1;
-			Pcrawl=0;
+			Pd=Px>oPx;
+			int fy=1;
 			for(int y=0;y<16;y++)
-				if(nthbit(x?Pmask.x6:Pmask.x0,y)){
-					if(fy==-1)fy=y;
-					if(!(Pcrawl=!(y>8||Pya)))Px=oPx;
-					if(y>4&&fy==y)Pya=fmin(Pya,-1);
+				if(nthbit(Pd?Pmask.x6:Pmask.x0,y)){
+					if(y>4&&fy)Pya=fmin(Pya,-1);
+					fy=0;
 				}
+		}
+		Pcrawl=!Pya&&Pmask.x6l&&!Pmask.x6h;
+		while(Pcrawl?Pmask.x0h:Pmask.x0){
+			Px++;
+			Pupmask();
+		}
+		while(Pcrawl?Pmask.x6h:Pmask.x6){
+			Px--;
+			Pupmask();
 		}
 		if(Pcrawl){
 			Px=(Px+oPx)/2;
-			drawSpr(ManCrawl,Px-Wx,Py-Wy+10,!(t&32),Pd==1);
+			drawSpr(ManCrawl,Px-Wx,Py-Wy+10,!(t&32),Pd);
 		}else{
 			Pjd=0;
 			if(glfwGetKey(GLFW_KEY_UP)){
@@ -131,7 +139,7 @@ int main(int argc,char**argv){
 				}
 				printf("%f\n",Py);
 			}
-			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd==1);
+			drawSpr(Man,Px-Wx,Py-Wy,Pya>1.125?4:Pj<-1?3:oPx==Px?0:1+!(t&32),Pd);
 		}
 		qtmove(P,Px,ceil(Py));
 		glfwSwapBuffers();
