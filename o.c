@@ -6,7 +6,7 @@ int getbxyi(int x,int y)
 	y>>=3;
 	return mapB[(2047-y)*256+(x>>3)]&1<<(x&7);
 }
-int getbxy(int x,double dy)
+int getbxy(int x,float dy)
 {
 	return getbxyi(x,ceil(dy));
 }
@@ -43,7 +43,7 @@ static qtree*qtmake(qtree*p,int x,int y,int w){
 void qtinit(){
 	qroot=qtmake(0,0,0,8192);
 }
-void qtdraw_(qtree*q,int Wx,int Wy){
+void qtdraw_(qtree*q){
 	glBegin(GL_LINES);
 	glVertex2f(q->x+q->w-Wx,q->y-Wy);
 	glVertex2f(q->x+q->w-Wx,q->y+q->w*2-Wy);
@@ -55,11 +55,11 @@ void qtdraw_(qtree*q,int Wx,int Wy){
 	glVertex2f(q->x-Wx,q->y+q->w*2-Wy);
 	glEnd();
 	for(int i=0;i<4;i++)
-		if(q->q[i])qtdraw_(q->q[i],Wx,Wy);
+		if(q->q[i])qtdraw_(q->q[i]);
 }
 void qtdraw(int Wx,int Wy){
 	glDisable(GL_TEXTURE_2D);
-	qtdraw_(qroot,Wx,Wy);
+	qtdraw_(qroot);
 	glEnable(GL_TEXTURE_2D);
 }
 static void qthit_(qtree*q,obj*o){
@@ -78,7 +78,7 @@ void qthit(obj*o){
 }
 static void qtadd_(qtree*q,obj*o){
 	unsigned xw=q->x+q->w,yh=q->y+q->w;
-	if(q->w==1||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
+	if(q->w==64||o->x<=xw&&o->x+o->w>xw||o->y<=yh&&o->y+o->h>yh){
 		o->o=q->o;
 		q->o=o;
 		o->q=q;
@@ -86,8 +86,8 @@ static void qtadd_(qtree*q,obj*o){
 	}
 	int qid;
 	if(o->x<=xw&&o->y<=yh)qid=0;
-	else if(o->x>xw&&o->y<=yh)qid=1;
-	else if(o->x<=xw&&o->y>yh)qid=2;
+	else(o->x>xw&&o->y<=yh)qid=1;
+	else(o->x<=xw&&o->y>yh)qid=2;
 	else qid=3;
 	if(!q->q[qid])q->q[qid]=qtmake(q,qid==0||qid==2?q->x:xw,qid==0||qid==1?q->y:yh,q->w/2);
 	qtadd_(q->q[qid],o);
@@ -99,10 +99,9 @@ void qtrm(obj*o){
 	if(o->q->o==o)o->q->o=o->o;
 	else orm(o->q->o,o);
 }
-obj*omake(int sz,int t,int x,int y,int w,int h){
+obj*omake(int sz,int t,int x,float y,int w,int h){
 	obj*o=malloc(sizeof(obj)+sz);
 	o->t=t;
-	o->s=sz;
 	o->x=x;
 	o->y=y;
 	o->w=w;
