@@ -13,14 +13,14 @@ struct{
 }Pmask;
 void Pupmask(){
 	memset(&Pmask,0,sizeof(Pmask));
-	for(int i=0;i<6;i++){
-		if(getbxy(P->x+i,P->y))Pmask.y0|=1<<i;
-		if(getbxy(P->x+i,P->y+15))Pmask.y15|=1<<i;
-		if(getbxy(P->x+i,P->y+16))Pmask.y16|=1<<i;
-	}
+	float py=P->y;
+	P->y=ceil(P->y);
+	Pmask.y0=getbx8y(P->x,P->y)&63;
+	Pmask.y15=getbx8y(P->x,P->y+15)&63;
+	Pmask.y16=getbx8y(P->x,P->y+16)&63;
 	for(int i=0;i<16;i++){
-		if(getbxy(P->x,P->y+i))Pmask.x0|=1<<i;
-		if(getbxy(P->x+6,P->y+i))Pmask.x6|=1<<i;
+		if(getbxyi(P->x,P->y+i))Pmask.x0|=1<<i;
+		if(getbxyi(P->x+6,P->y+i))Pmask.x6|=1<<i;
 	}
 	qthit(P);
 	for(int i=0;i<P->c->n;i++){
@@ -35,6 +35,7 @@ void Pupmask(){
 			if(pino(P->x+6,P->y+i,o))Pmask.x6|=1<<i;
 		}
 	}
+	P->y=py;
 }
 int main(int argc,char**argv){
 	glfwInit();
@@ -57,9 +58,9 @@ int main(int argc,char**argv){
 	for(;;){
 		t++;
 		drawRect(0,0,1024,256,Wx/16384.,Wy/16384.,1./16,1./64);
-		R->x++;
-		R->y++;
-		qtmove(R);
+		//R->x++;
+		//R->y++;
+		//qtmove(R);
 		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
 		float oPy=P->y;
 		int oPx=P->x;

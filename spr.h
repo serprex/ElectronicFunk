@@ -1,7 +1,7 @@
-typedef enum{Man,ManCrawl,RClean,RScience,RDrill,LSPR}sprid;
+typedef enum{Boy,BoyCrawl,Man,ManCrawl,RClean,RScience,RDrill,LSPR}sprid;
 extern struct spr{
-	short x,y;
-	unsigned char w,h;
+	uint16_t x,y;
+	uint8_t w,h;
 }spr[LSPR];
 void drawRect_(int x,int y,int w,int h,float tx,float ty,float tw,float th);
 void drawRect(int x,int y,int w,int h,float tx,float ty,float tw,float th);

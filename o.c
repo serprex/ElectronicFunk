@@ -1,5 +1,16 @@
 #include "ef.h"
 static qtree*qroot;
+int getbx8y(int x,int y){
+	unsigned xx=x&7;
+	x>>=3;
+	y=(2047-(y>>3))<<8;
+	unsigned x7=x&7;
+	union{unsigned w;struct{uint8_t lo,hi;};}m;
+	m.lo=-!!(mapB[y+(x>>3)]&1<<x7);
+	if(!xx)return m.w;
+	m.hi=-!!(mapB[y+(x+1>>3)]&1<<(x+1&7));
+	return m.w>>xx;
+}
 int getbxyi(int x,int y)
 {
 	x>>=3;

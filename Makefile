@@ -3,7 +3,7 @@ O=tgen.o bgen.o spr.o o.o ef.o
 all: ${O}
 	${CC} ${O} -o ElectronicFunk -fwhole-program -lglfw -lGL -lm
 clean:
-	rm -rf *.o
+	rm *.o
 spr: spr/*
 	pinch S R
 	bitch map
