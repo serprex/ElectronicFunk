@@ -25,23 +25,9 @@ int ohit(obj*a,obj*b){
 	int ax2=a->x+a->w,ay2=a->y+a->h,bx2=b->x+b->w,by2=b->y+b->h;
 	return a!=b&&(pino(a->x,a->y,b)||pino(ax2,a->y,b)||pino(a->x,ay2,b)||pino(ax2,ay2,b)||pino(b->x,b->y,a)||pino(bx2,b->y,a)||pino(b->x,by2,a)||pino(bx2,by2,a)||a->x>b->x&&a->x<bx2&&a->y>b->y&&a->y<by2||b->x>a->x&&b->x<ax2&&b->y>a->y&&b->y<ay2);
 }
-void orm(obj*qo,obj*o){//UNSAFE
-	for(;qo;qo=qo->o)
-		if(qo->o==o){
-			qo->o=o->o;
-			break;
-		}
-}
-void jadd(jray**l,obj*o){
-	jray*ll;
-	if(*l){
-		(*l)->n++;
-		ll=*l=realloc(*l,sizeof(jray)+(*l)->n*sizeof(obj*));
-	}else{
-		ll=*l=malloc(sizeof(jray)+sizeof(obj*));
-		ll->n=1;
-	}
-	ll->o[ll->n-1]=o;
+static void jadd(obj*o,obj*x){
+	o->c=realloc(o->c,++o->cn*sizeof(obj*));
+	o->c[o->cn-1]=x;
 }
 static qtree*qtmake(qtree*p,int x,int y,int w){
 	qtree*q=calloc(1,sizeof(qtree));
@@ -76,15 +62,16 @@ void qtdraw(int Wx,int Wy){
 static void qthit_(qtree*q,obj*o){
 	unsigned xw=q->x+q->w,yh=q->y+q->w;
 	for(obj*qo=q->o;qo;qo=qo->o)
-		if(ohit(o,qo))jadd(&o->c,qo);
+		if(ohit(o,qo))jadd(o,qo);
 	if(o->x<=xw&&o->y<=yh&&q->q[0])qthit_(q->q[0],o);
 	if(o->x+o->w>xw&&o->y<=yh&&q->q[1])qthit_(q->q[1],o);
 	if(o->x<=xw&&o->y+o->h>yh&&q->q[2])qthit_(q->q[2],o);
 	if(o->x+o->w>xw&&o->y+o->h>yh&&q->q[3])qthit_(q->q[3],o);
 }
 void qthit(obj*o){
-	o->c=realloc(o->c,sizeof(jray));
-	o->c->n=0;
+	free(o->c);
+	o->c=0;
+	o->cn=0;
 	qthit_(qroot,o);
 }
 static void qtadd_(qtree*q,obj*o){
@@ -108,17 +95,23 @@ void qtadd(obj*o){
 }
 void qtrm(obj*o){
 	if(o->q->o==o)o->q->o=o->o;
-	else orm(o->q->o,o);
+	else{
+		obj*qo=o->q->o;
+		while(qo->o!=o)qo=qo->o;
+		qo->o=o->o;
+	}
 }
 obj*omake(int sz,int t,int x,float y,int w,int h){
 	obj*o=malloc(sizeof(obj)+sz);
 	o->t=t;
+	o->T=t&1;
 	o->x=x;
+	o->cn=0;
 	o->y=y;
 	o->w=w;
 	o->h=h;
 	o->o=0;
-	o->c=calloc(1,sizeof(jray));
+	o->c=0;
 	memset(&o->d,0,sz);
 	qtadd(o);
 	return o;
@@ -145,4 +138,25 @@ void qtmove(obj*o){
 	qtaddhint(q,o);
 	qtgchint(q);
 	qthit(o);
+}
+void qtit_(qtree*q){
+	for(int i=0;i<4;i++)
+		if(q->q[i])qtit_(q->q[i]);
+	for(obj*o=q->o,*no;o;o=no){
+		if(o->T==(t&1))return;
+		o->T=t&1;
+		no=o->o;
+		switch(o->t){
+		case(RClean)
+			if(o->x<16000&&o->y<16000){
+				o->x++;
+				o->y++;
+				qtmove(o);
+			}
+			drawSpr(RClean,o->x,o->y,!(t&16),0);
+		}
+	}
+}
+void qtit(){
+	qtit_(qroot);
 }

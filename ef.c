@@ -23,8 +23,8 @@ void Pupmask(){
 		if(getbxyi(P->x+6,P->y+i))Pmask.x6|=1<<i;
 	}
 	qthit(P);
-	for(int i=0;i<P->c->n;i++){
-		obj*o=P->c->o[i];
+	for(int i=0;i<P->cn;i++){
+		obj*o=P->c[i];
 		for(int i=0;i<6;i++){
 			if(pino(P->x+i,P->y,o))Pmask.y0|=1<<i;
 			if(pino(P->x+i,P->y+15,o))Pmask.y15|=1<<i;
@@ -41,7 +41,7 @@ int main(int argc,char**argv){
 	glfwInit();
 	glfwDisable(GLFW_AUTO_POLL_EVENTS);
 	glfwOpenWindow(1024,256,0,0,0,0,0,0,GLFW_WINDOW);
-	glOrtho(0,1024,256,0,1,-1);
+	glOrtho(0,1024,256,0,1,0);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
@@ -53,15 +53,17 @@ int main(int argc,char**argv){
 	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,2048,2048,0,GL_RGBA,GL_UNSIGNED_BYTE,S);
 	qtinit();
 	P=omake(0,Man,1800,900,6,16);
-	obj*R=omake(0,RClean,1700,900,8,8);
+	omake(0,RClean,1700,900,8,8);
 	srand(glfwGetTime()*10e5);
 	for(;;){
 		t++;
+		if(P->x<Wx+512-128)Wx=P->x-512+128;
+		else(P->x>Wx+512+128)Wx=P->x-512-128;
+		if(Wx<0)Wx=0;
+		else(Wx>2048*8)Wx=2048*8;
+		Wy=P->y-160;
 		drawRect(0,0,1024,256,Wx/16384.,Wy/16384.,1./16,1./64);
-		//R->x++;
-		//R->y++;
-		//qtmove(R);
-		drawSpr(RClean,R->x-Wx,R->y-Wy,!(t&16),0);
+		qtdraw();
 		float oPy=P->y;
 		int oPx=P->x;
 		P->x+=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
@@ -103,21 +105,15 @@ int main(int argc,char**argv){
 				Pya=0;
 				P->y=ceil(P->y);
 				do Pupmask(); while(Pmask.y15&&(P->y--,1));
-			}
-			if(Pya<0&&Pmask.y0){
+			}else if(Pya<0&&Pmask.y0){
 				Pya=0;
 				P->y=floor(P->y);
 				do Pupmask(); while(Pmask.y0&&(P->y++,1));
 			}
-			drawSpr(Man,P->x-Wx,P->y-Wy,Pya>1.125?4:Pj<-1?3:oPx==P->x?0:1+!(t&32),Pd);
+			drawSpr(Man,P->x,P->y,Pya>1.125?4:Pj<-1?3:oPx==P->x?0:1+!(t&32),Pd);
 		}
 		qtmove(P);
-		qtdraw();
-		if(P->x<Wx+512-128)Wx=P->x-512+128;
-		else(P->x>Wx+512+128)Wx=P->x-512-128;
-		if(Wx<0)Wx=0;
-		else(Wx>2048*8)Wx=2048*8;
-		Wy=P->y-160;
+		qtit();
 		glfwSwapBuffers();
 		double gT=1./59-glfwGetTime();
 		if(gT>0&&!glfwGetKey(GLFW_KEY_SPACE))glfwSleep(gT);

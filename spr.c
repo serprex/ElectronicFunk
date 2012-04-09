@@ -24,5 +24,7 @@ void drawRect(int x,int y,int w,int h,float tx,float ty,float tw,float th){
 	glEnd();
 }
 void drawSpr(sprid s,int x,int y,int f,int h){
+	x-=Wx;
+	y-=Wy;
 	drawRect(h?x:x+spr[s].w,y,spr[s].w*(h?1:-1),spr[s].h,spr[s].x/2048.+spr[s].w*f/2048.,spr[s].y/2048.,spr[s].w/2048.,spr[s].h/2048.);
 }
