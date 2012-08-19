@@ -13,5 +13,5 @@ static inline int nthbit(int x,int n){
 }
 extern float Wy;
 extern int t,Wx;
-#define case(x) break;case x:
+#define case(x) break;case x:;
 #define else(x) else if(x)
