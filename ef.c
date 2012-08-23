@@ -4,7 +4,7 @@
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define MIN(x,y) ((x)>(y)?(y):(x))
 float Wy=0,Pya=0,Pj=-1;
-int Wx=0,t=0,Pd=1,Pjd=0,Pcrawl;
+int Wx=0,t=0,Pd=1,Pjd=0,Pcrawl,Pxx;
 obj*P;
 struct{
 	union{uint16_t x0;struct{uint8_t x0l,x0h;};};
@@ -66,7 +66,8 @@ int main(int argc,char**argv){
 		qtdraw();
 		float oPy=P->y;
 		int oPx=P->x;
-		P->x+=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
+		if(!Pya)Pxx=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
+		P->x+=Pxx;
 		Pupmask();
 		if(oPx!=P->x){
 			Pd=P->x>oPx;
