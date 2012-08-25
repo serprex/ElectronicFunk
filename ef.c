@@ -3,8 +3,8 @@
 #define SQR(x) ((x)*(x))
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #define MIN(x,y) ((x)>(y)?(y):(x))
-float Wy=0,Pya=0,Pj=-1;
-int Wx=0,t=0,Pd=1,Pjd=0,Pcrawl,Pxx;
+float Wy,Pya,Pj=-1;
+int Wx,t,Pd=1,Pjd,Pcrawl,Pxx;
 obj*P;
 struct{
 	union{uint16_t x0;struct{uint8_t x0l,x0h;};};
@@ -38,19 +38,6 @@ void Pupmask(){
 	P->y=py;
 }
 int main(int argc,char**argv){
-	glfwInit();
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
-	glfwOpenWindow(1024,256,0,0,0,0,0,0,GLFW_WINDOW);
-	glOrtho(0,1024,256,0,1,0);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-	{GLuint Stx;
-	glGenTextures(1,&Stx);
-	glBindTexture(GL_TEXTURE_2D,Stx);}
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,2048,2048,0,GL_RGBA,GL_UNSIGNED_BYTE,S);
 	qtinit();
 	P=omake(0,Man,1800,900,6,16);
 	omake(0,RClean,1700,900,8,8);
@@ -66,7 +53,7 @@ int main(int argc,char**argv){
 		qtdraw();
 		float oPy=P->y;
 		int oPx=P->x;
-		if(!Pya)Pxx=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
+		Pxx=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
 		P->x+=Pxx;
 		Pupmask();
 		if(oPx!=P->x){
@@ -115,15 +102,6 @@ int main(int argc,char**argv){
 		}
 		qtmove(P);
 		qtit();
-		glfwSwapBuffers();
-		double gT=1./59-glfwGetTime();
-		if(gT>0&&!glfwGetKey(GLFW_KEY_SPACE))glfwSleep(gT);
-		else printf("%f\n",-gT);
-		glfwSetTime(0);
-		glfwPollEvents();
-		if(glfwGetKey(GLFW_KEY_ESC)||!glfwGetWindowParam(GLFW_OPENED)){
-			printf("%d %f\n",P->x,P->y);
-			return 0;
-		}
+		sprEnd();
 	}
 }
