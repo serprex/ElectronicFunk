@@ -38,6 +38,7 @@ void Pupmask(){
 	P->y=py;
 }
 int main(int argc,char**argv){
+	sprInit();
 	qtinit();
 	P=omake(0,Man,1800,900,6,16);
 	omake(0,RClean,1700,900,8,8);
