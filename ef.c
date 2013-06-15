@@ -42,7 +42,7 @@ int main(int argc,char**argv){
 	qtinit();
 	P=omake(0,Man,1800,900,6,16);
 	omake(0,RClean,1700,900,8,8);
-	srand(glfwGetTime()*10e5);
+	initrand();
 	for(;;){
 		t++;
 		if(P->x<Wx+512-128)Wx=P->x-512+128;
@@ -54,7 +54,7 @@ int main(int argc,char**argv){
 		qtdraw();
 		float oPy=P->y;
 		int oPx=P->x;
-		Pxx=glfwGetKey(GLFW_KEY_RIGHT)-glfwGetKey(GLFW_KEY_LEFT);
+		Pxx=glfwGetKey(wnd,GLFW_KEY_RIGHT)-glfwGetKey(wnd,GLFW_KEY_LEFT);
 		P->x+=Pxx;
 		Pupmask();
 		if(oPx!=P->x){
@@ -76,7 +76,7 @@ int main(int argc,char**argv){
 			drawSpr(ManCrawl,P->x-Wx,P->y-Wy+10,!(t&32),Pd);
 		}else{
 			Pjd=0;
-			if(glfwGetKey(GLFW_KEY_UP)&&Pmask.y16){
+			if(glfwGetKey(wnd,GLFW_KEY_UP)&&Pmask.y16){
 				Pj=fmax(Pj-.125,-3);
 				Pjd=1;
 			}

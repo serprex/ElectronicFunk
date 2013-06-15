@@ -1,5 +1,6 @@
 #include "ef.h"
 static GLuint Stx;
+GLFWwindow*wnd;
 struct spr spr[LSPR]={
 	{0,2032,6,16},
 	{30,2042,16,6},
@@ -37,8 +38,8 @@ void sprInit(){
 			Sask[y][x]=Sask[y][1023-x]=Sask[255-y][x]=Sask[255-y][1023-x]=255-255*(xy+(1-xy*xy)/3);
 		}
 	glfwInit();
-	glfwDisable(GLFW_AUTO_POLL_EVENTS);
-	glfwOpenWindow(1024,256,0,0,0,0,0,0,GLFW_WINDOW);
+	wnd=glfwCreateWindow(1024,256,0,0,0);
+	glfwMakeContextCurrent(wnd);
 	glOrtho(0,1024,256,0,1,0);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_BLEND);
@@ -61,11 +62,11 @@ void sprEnd(){
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glBlendEquation(GL_FUNC_ADD);
 	glBindTexture(GL_TEXTURE_2D,Stx);
-	glfwSwapBuffers();
-	double gT=1./59-glfwGetTime();
-	if(gT>0&&!glfwGetKey(GLFW_KEY_SPACE))glfwSleep(gT);
+	glfwSwapBuffers(wnd);
+	double gT=1./59-timesince();
+	if(gT>0&&!glfwGetKey(wnd,GLFW_KEY_SPACE))sleepd(gT);
 	else printf("%f\n",-gT);
-	glfwSetTime(0);
+	inittime(0);
 	glfwPollEvents();
-	if(glfwGetKey(GLFW_KEY_ESC)||!glfwGetWindowParam(GLFW_OPENED))exit(0);
+	if(glfwGetKey(wnd,GLFW_KEY_ESCAPE)||glfwWindowShouldClose(wnd))exit(0);
 }

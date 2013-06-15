@@ -2,7 +2,9 @@
 #include <stdint.h>
 #include <math.h>
 #include <string.h>
-#include <GL/glfw.h>
+#include <GLFW/glfw3.h>
+#include <winix/time.h>
+#include <winix/rand.h>
 #include <stdio.h>
 #include "tgen.h"
 #include "bgen.h"
