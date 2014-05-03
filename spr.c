@@ -38,7 +38,7 @@ void sprInit(){
 			Sask[y][x]=Sask[y][1023-x]=Sask[255-y][x]=Sask[255-y][1023-x]=255-255*(xy+(1-xy*xy)/3);
 		}
 	glfwInit();
-	wnd=glfwCreateWindow(1024,256,0,0,0);
+	wnd=glfwCreateWindow(1024,256,"",0,0);
 	glfwMakeContextCurrent(wnd);
 	glOrtho(0,1024,256,0,1,0);
 	glEnable(GL_TEXTURE_2D);
