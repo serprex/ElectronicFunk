@@ -1,0 +1,29 @@
+cc=gcc
+lf=-lGL
+cf=-std=gnu11 -Ofast -g -pipe
+rule cc
+ command=$cc $cf $in -o $out -lglfw -lm $lf
+rule pinch
+ command=pinch S
+rule bitch
+ command=bitch map
+build tgen.c:pinch spr/S.png
+build bgen.c:bitch spr/map.png
+build tgen.o:cc tgen.c
+ lf=-c
+build bgen.o:cc bgen.c
+ lf=-c
+build spr.o:cc spr.c
+ lf=-c
+build o.o:cc o.c
+ lf=-c
+build ef.o:cc ef.c
+ lf=-c
+build dit/main.o:cc dit/main.c
+ lf=-c
+build ElectronicFunk:cc tgen.o bgen.o spr.o o.o ef.o
+build ElectronicFunk.exe:cc tgen.c bgen.c spr.c o.c ef.c
+ cc=i486-mingw32-gcc
+ lf=-lopengl32
+build Ditor:cc tgen.o bgen.o spr.o o.o dit/main.o
+default ElectronicFunk

@@ -139,6 +139,23 @@ void qtmove(obj*o){
 	qtgchint(q);
 	qthit(o);
 }
+bool mtowards(obj*o,uint16_t tx,uint16_t ty,uint16_t hs,uint16_t vs){
+	if (o->x<tx){
+		o->x += hs;
+	}
+	if (o->x>tx){
+		o->x -= hs;
+		if (o->x<tx) o->x=tx;
+	}
+	if (o->y<ty){
+		o->y += vs;
+	}
+	if (o->y>ty){
+		o->y -= vs;
+		if (o->y<ty) o->y=ty;
+	}
+	return o->x == tx && o->y == ty;
+}
 void qtit_(qtree*q){
 	for(int i=0;i<4;i++)
 		if(q->q[i])qtit_(q->q[i]);
@@ -154,9 +171,24 @@ void qtit_(qtree*q){
 				qtmove(o);
 			}
 			drawSpr(RClean,o->x,o->y,!(t&16),0);
+		case(Plat){
+			uint16_t n = getdata(o,uint16_t,0),
+				hs = getdata(o,uint16_t,4+n*8),
+				vs = getdata(o,uint16_t,6+n*8),
+				tx = getdata(o,uint16_t,8+n*8),
+				ty = getdata(o,uint16_t,10+n*8);
+			if (mtowards(o, tx, ty, hs, vs)){
+				setdata(o,uint16_t,0,getdata(o,uint16_t,2)==n?0:n+1);
+			}
+			drawSpr(RClean,o->x,o->y,!(t&16),0);
+		}
 		}
 	}
 }
 void qtit(){
 	qtit_(qroot);
+}
+qtree*getqtree(){
+	// should only be used by level editor
+	return qroot;
 }

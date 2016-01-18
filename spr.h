@@ -1,4 +1,5 @@
-typedef enum{Boy,BoyCrawl,Man,ManCrawl,RClean,RScience,RDrill,LSPR}sprid;
+typedef enum{Boy,BoyCrawl,Man,ManCrawl,RClean,RScience,RDrill,LSPR,
+	Plat,LLSPR}sprid;
 extern struct spr{
 	uint16_t x,y;
 	uint8_t w,h;

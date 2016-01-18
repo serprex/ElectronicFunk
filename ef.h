@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <math.h>
 #include <string.h>
 #include <GLFW/glfw3.h>
@@ -17,3 +18,7 @@ extern float Wy;
 extern int t,Wx;
 #define case(x) break;case x:;
 #define else(x) else if(x)
+#define LEN(x) (sizeof(x)/sizeof(*(x)))
+#define SQR(x) ((x)*(x))
+#define MAX(x,y) ((x)>(y)?(x):(y))
+#define MIN(x,y) ((x)>(y)?(y):(x))

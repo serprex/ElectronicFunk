@@ -1,8 +1,4 @@
 #include "ef.h"
-#define LEN(x) (sizeof(x)/sizeof(*(x)))
-#define SQR(x) ((x)*(x))
-#define MAX(x,y) ((x)>(y)?(x):(y))
-#define MIN(x,y) ((x)>(y)?(y):(x))
 float Wy,Pya,Pj=-1;
 int Wx,t,Pd=1,Pjd,Pcrawl,Pxx;
 obj*P;
